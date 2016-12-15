@@ -1,11 +1,12 @@
+'use strict';
+
 var moment = require('moment');
-var School = require('../models/').School;
 
-var outputSanitizer = function(school) {
-  school.dueDate = moment.utc(school.dueDate).format('YYYY-MM-DD');
-  return school;
+module.exports = function(models) {
+  var outputSanitizer = function(school) {
+    school.dueDate = moment.utc(school.dueDate).format('YYYY-MM-DD');
+    return school;
+  };
+
+  return require('./baseDbService')(models.School, outputSanitizer);
 };
-
-var schoolService = require('./baseDbService')(School, outputSanitizer);
-
-module.exports = schoolService;

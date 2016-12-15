@@ -1,4 +1,5 @@
-var Category = require('../models/').Category;
-var categoryService = require('./baseDbService')(Category);
+'use strict';
 
-module.exports = categoryService;
+module.exports = function(models) {
+  return require('./baseDbService')(models.Category);
+};

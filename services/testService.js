@@ -1,4 +1,5 @@
-var Test = require('../models/').Test;
-var testService = require('./baseDbService')(Test);
+'use strict';
 
-module.exports = testService;
+module.exports = function(models) {
+  return require('./baseDbService')(models.Test);
+};

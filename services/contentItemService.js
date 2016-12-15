@@ -1,4 +1,5 @@
-var ContentItem = require('../models/').ContentItem;
-var contentItemService = require('./baseDbService')(ContentItem);
+'use strict';
 
-module.exports = contentItemService;
+module.exports = function(models) {
+  return require('./baseDbService')(models.ContentItem);
+};
