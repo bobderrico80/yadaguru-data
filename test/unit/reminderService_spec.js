@@ -1,19 +1,21 @@
+'use strict';
+
 var sinon = require('sinon');
 var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
 var sinonChai = require('sinon-chai');
+var proxyquire = require('proxyquire').noCallThru();
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 chai.should();
 
-var models = require('../../models');
-var Reminder = models.Reminder;
-var BaseReminder = models.BaseReminder;
-var Category = models.Category;
-var School = models.School;
-var reminderService = require('../../services/reminderService');
-
 describe('The Reminders Service', function() {
+  var mocks = require('../mocks')('Reminder');
+  mocks.addResource('BaseReminder');
+  mocks.addResource('Category');
+  mocks.addResource('School');
+  var reminderService;
+  
   var dbResponse = [{
     dataValues: {
       id: '1',
@@ -121,30 +123,32 @@ describe('The Reminders Service', function() {
     dueDate: '2017-02-01',
     timeframe: 'One week before'
   }];
+  
+  beforeEach(function() {
+    mocks.stubMethods();
+
+    reminderService = proxyquire('../../services/reminderService', {
+      '../models/': mocks.modelMock
+    });
+  });
+
+  afterEach(function() {
+    mocks.restoreStubs();
+  });
 
   describe('The findByUserWithBaseReminders function', function() {
-    var findAll;
-
-    beforeEach(function() {
-      findAll = sinon.stub(Reminder, 'findAll')
-    });
-
-    afterEach(function() {
-      findAll.restore();
-    });
-
     it('should resolve with a flattened array of reminders joined with base reminders, joined with categories', function() {
-      findAll.withArgs({
+      mocks.stubs.Reminder.findAll.withArgs({
           where: {
             userId: 1
           },
           include: [{
-            model: BaseReminder,
+            model: mocks.modelMock.BaseReminder,
             include: {
-              model: Category
+              model: mocks.modelMock.Category
             }
           }, {
-            model: School
+            model: mocks.modelMock.School
           }]
       }).returns(Promise.resolve(dbResponse));
 
@@ -152,36 +156,26 @@ describe('The Reminders Service', function() {
     });
 
     it('should resolve with an empty array there are no reminders', function() {
-      findAll.returns(Promise.resolve([]));
+      mocks.stubs.Reminder.findAll.returns(Promise.resolve([]));
 
       return reminderService.findByUserWithBaseReminders(1).should.eventually.deep.equal([]);
     });
   });
 
   describe('The findByUserForSchoolWithBaseReminders function', function() {
-    var findAll;
-
-    beforeEach(function() {
-      findAll = sinon.stub(Reminder, 'findAll')
-    });
-
-    afterEach(function() {
-      findAll.restore();
-    });
-
     it('should resolve with a flattened array of reminders for a school, joined with base reminders, joined with categories', function() {
-      findAll.withArgs({
+      mocks.stubs.Reminder.findAll.withArgs({
         where: {
           userId: 1,
           schoolId: 1
         },
         include: [{
-          model: BaseReminder,
+          model: mocks.modelMock.BaseReminder,
           include: {
-            model: Category
+            model: mocks.modelMock.Category
           }
         }, {
-          model: School
+          model: mocks.modelMock.School
         }]
       }).returns(Promise.resolve(dbResponse));
 
@@ -189,36 +183,26 @@ describe('The Reminders Service', function() {
     });
 
     it('should resolve with an empty array there are no reminders', function() {
-      findAll.returns(Promise.resolve([]));
+      mocks.stubs.Reminder.findAll.returns(Promise.resolve([]));
 
       return reminderService.findByUserForSchoolWithBaseReminders().should.eventually.deep.equal([]);
     });
   });
 
   describe('The findByIdForUserWithBaseReminders function', function() {
-    var findAll;
-
-    beforeEach(function() {
-      findAll = sinon.stub(Reminder, 'findAll')
-    });
-
-    afterEach(function() {
-      findAll.restore();
-    });
-
     it('should resolve with a flattened array of reminder matching the id, joined with base reminders, joined with categories', function() {
-      findAll.withArgs({
+      mocks.stubs.Reminder.findAll.withArgs({
         where: {
           id: 1,
           userId: 1
         },
         include: [{
-          model: BaseReminder,
+          model: mocks.modelMock.BaseReminder,
           include: {
-            model: Category
+            model: mocks.modelMock.Category
           }
         }, {
-          model: School
+          model: mocks.modelMock.School
         }]
       }).returns(Promise.resolve([dbResponse[0]]));
 
@@ -226,27 +210,17 @@ describe('The Reminders Service', function() {
     });
 
     it('should resolve with an empty array there are no reminders', function() {
-      findAll.returns(Promise.resolve([]));
+      mocks.stubs.Reminder.findAll.returns(Promise.resolve([]));
 
       return reminderService.findByIdForUserWithBaseReminders(1).should.eventually.deep.equal([]);
     });
   });
 
   describe('The bulk create function', function() {
-    var bulkCreate;
-
     var newReminders = reminders;
 
-    before(function() {
-      bulkCreate = sinon.stub(Reminder, 'bulkCreate');
-    });
-
-    after(function() {
-      bulkCreate.restore();
-    });
-
     it('should resolve with the count of newly-inserted reminder objects', function() {
-      bulkCreate.returns(Promise.resolve(newReminders));
+      mocks.stubs.Reminder.bulkCreate.returns(Promise.resolve(newReminders));
 
       return reminderService.bulkCreate(newReminders).should.eventually.equal(2);
     });

@@ -1,17 +1,18 @@
+'use strict';
+
 var sinon = require('sinon');
 var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
 var sinonChai = require('sinon-chai');
+var proxyquire = require('proxyquire').noCallThru();
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 chai.should();
 
-var models = require('../../models');
-var TestDate = models.TestDate;
-var Test = models.Test;
-var testDateService = require('../../services/testDateService');
-
 describe('The TestDates Service', function() {
+  var mocks = require('../mocks')('TestDate');
+  var testDateService;
+
   var testDates =[{
     id: 1,
     testId: 1,
@@ -23,9 +24,21 @@ describe('The TestDates Service', function() {
     registrationDate: '2017-01-01',
     adminDate: '2017-02-01'
   }];
+  
+  beforeEach(function() {
+    mocks.stubMethods();
+
+    testDateService = proxyquire('../../services/testDateService', {
+      '../models/': mocks.modelMock
+    });
+  });
+
+  afterEach(function() {
+    mocks.restoreStubs();
+  });
 
   describe('The findAll function', function() {
-    var findAll, dbResponse;
+    var dbResponse;
 
     beforeEach(function() {
       var tests =[{
@@ -85,18 +98,11 @@ describe('The TestDates Service', function() {
           }
         }
       }];
-
-      findAll = sinon.stub(TestDate, 'findAll');
-    });
-
-    afterEach(function() {
-      findAll.restore();
     });
 
     it('should return all testDates including its associated test data', function() {
-      findAll.withArgs({
-        include: Test
-      }).returns(Promise.resolve(dbResponse));
+      mocks.stubs.TestDate.findAll
+        .returns(Promise.resolve(dbResponse));
 
       var returnedResult = [{
         id: '1',
@@ -144,7 +150,7 @@ describe('The TestDates Service', function() {
     });
 
     it('should resolve with an empty array there are no testDates', function() {
-      findAll.withArgs({include: Test})
+      mocks.stubs.TestDate.findAll
         .returns(Promise.resolve([]));
 
       return testDateService.findAll().should.eventually.deep.equal([]);
@@ -152,25 +158,15 @@ describe('The TestDates Service', function() {
   });
 
   describe('The findById function', function() {
-    var findById;
-
-    before(function() {
-      findById = sinon.stub(TestDate, 'findById');
-    });
-
-    after(function() {
-      findById.restore();
-    });
-
     it('should resolve with an array with the matching testDate object', function() {
-      findById.withArgs(1)
+      mocks.stubs.TestDate.findById.withArgs(1)
         .returns(Promise.resolve({dataValues: testDates[0]}));
 
       return testDateService.findById(1).should.eventually.deep.equal([testDates[0]]);
     });
 
     it('should resolve with an empty array if no testDates were found', function() {
-      findById.withArgs(3)
+      mocks.stubs.TestDate.findById.withArgs(3)
         .returns(Promise.resolve(null));
 
       return testDateService.findById(3).should.eventually.deep.equal([]);
@@ -179,24 +175,14 @@ describe('The TestDates Service', function() {
 
 
   describe('The create function', function() {
-    var create;
-
     var newTestDate = {
       testId: 1,
       registrationDate: '2016-09-01',
       adminDate: '2016-10-01'
     };
 
-    before(function() {
-      create = sinon.stub(TestDate, 'create');
-    });
-
-    after(function() {
-      create.restore();
-    });
-
     it('should resolve with an array containing the new testDate object', function() {
-      create.withArgs(newTestDate)
+      mocks.stubs.TestDate.create.withArgs(newTestDate)
         .returns(Promise.resolve({dataValues: newTestDate}));
 
       return testDateService.create(newTestDate).should.eventually.deep.equal([newTestDate]);
@@ -204,7 +190,7 @@ describe('The TestDates Service', function() {
   });
 
   describe('The update function', function() {
-    var findById, row, update, idToUpdate;
+    var row, update, idToUpdate;
 
     var updatedTestDate = {
       testId: 1,
@@ -214,19 +200,17 @@ describe('The TestDates Service', function() {
 
     idToUpdate = 1;
 
-    before(function() {
-      findById = sinon.stub(TestDate, 'findById');
+    beforeEach(function() {
       row = {update: function(){}};
       update = sinon.stub(row, 'update');
     });
 
-    after(function() {
-      findById.restore();
+    afterEach(function() {
       update.restore();
     });
 
     it('should resolve with an array containing the updated testDate object', function() {
-      findById.withArgs(idToUpdate)
+      mocks.stubs.TestDate.findById.withArgs(idToUpdate)
         .returns(Promise.resolve(row));
       update.withArgs(updatedTestDate)
         .returns(Promise.resolve({dataValues: updatedTestDate}));
@@ -235,7 +219,7 @@ describe('The TestDates Service', function() {
     });
 
     it('should resolve with false if the id does not exist', function() {
-      findById.withArgs(idToUpdate)
+      mocks.stubs.TestDate.findById.withArgs(idToUpdate)
         .returns(Promise.resolve(null));
 
       return testDateService.update(idToUpdate, updatedTestDate).should.eventually.be.false;
@@ -243,23 +227,21 @@ describe('The TestDates Service', function() {
   });
 
   describe('The destroy function', function() {
-    var row, destroy, findById;
+    var row, destroy;
 
     var idToDestroy = 1;
 
-    before(function() {
-      findById = sinon.stub(TestDate, 'findById');
+    beforeEach(function() {
       row = {destroy: function(){}};
       destroy = sinon.stub(row, 'destroy');
     });
 
-    after(function() {
-      findById.restore();
+    afterEach(function() {
       destroy.restore();
     });
 
     it('should resolve with true when the row is destroyed', function() {
-      findById.withArgs(idToDestroy)
+      mocks.stubs.TestDate.findById.withArgs(idToDestroy)
         .returns(Promise.resolve(row));
       destroy.withArgs()
         .returns(Promise.resolve(undefined));
@@ -268,7 +250,7 @@ describe('The TestDates Service', function() {
     });
 
     it('should resolve with false id does not exist', function() {
-      findById.withArgs(idToDestroy)
+      mocks.stubs.TestDate.findById.withArgs(idToDestroy)
         .returns(Promise.resolve(null));
 
       return testDateService.destroy(idToDestroy).should.eventually.be.false;

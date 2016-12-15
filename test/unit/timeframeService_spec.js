@@ -1,16 +1,18 @@
+'use strict';
+
 var sinon = require('sinon');
 var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
 var sinonChai = require('sinon-chai');
+var proxyquire = require('proxyquire').noCallThru();
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 chai.should();
 
-var models = require('../../models');
-var Timeframe = models.Timeframe;
-var timeframeService = require('../../services/timeframeService');
-
 describe('The Timeframes Service', function() {
+  var mocks = require('../mocks')('Timeframe');
+  var timeframeService;
+
   var timeframes =[{
     id: 1,
     name: 'Today',
@@ -28,19 +30,21 @@ describe('The Timeframes Service', function() {
     formula: '2017-01-01'
   }];
 
+  beforeEach(function() {
+    mocks.stubMethods();
+
+    timeframeService = proxyquire('../../services/timeframeService', {
+      '../models/': mocks.modelMock
+    });
+  });
+
+  afterEach(function() {
+    mocks.restoreStubs();
+  });
+
   describe('The findAll function', function() {
-    var findAll;
-
-    before(function() {
-      findAll = sinon.stub(Timeframe, 'findAll');
-    });
-
-    after(function() {
-      findAll.restore();
-    });
-
     it('should resolve with an array of objects representing timeframes', function() {
-      findAll.returns(Promise.resolve(timeframes.map(
+      mocks.stubs.Timeframe.findAll.returns(Promise.resolve(timeframes.map(
         function(timeframe) {
           return {dataValues: timeframe};
         }
@@ -50,32 +54,22 @@ describe('The Timeframes Service', function() {
     });
 
     it('should resolve with an empty array there are no timeframes', function() {
-      findAll.returns(Promise.resolve([]));
+      mocks.stubs.Timeframe.findAll.returns(Promise.resolve([]));
 
       return timeframeService.findAll().should.eventually.deep.equal([]);
     });
   });
 
   describe('The findById function', function() {
-    var findById;
-
-    before(function() {
-      findById = sinon.stub(Timeframe, 'findById');
-    });
-
-    after(function() {
-      findById.restore();
-    });
-
     it('should resolve with an array with the matching timeframe object', function() {
-      findById.withArgs(1)
+      mocks.stubs.Timeframe.findById.withArgs(1)
         .returns(Promise.resolve({dataValues: timeframes[0]}));
 
       return timeframeService.findById(1).should.eventually.deep.equal([timeframes[0]]);
     });
 
     it('should resolve with an empty array if no timeframes were found', function() {
-      findById.withArgs(3)
+      mocks.stubs.Timeframe.findById.withArgs(3)
         .returns(Promise.resolve(null));
 
       return timeframeService.findById(3).should.eventually.deep.equal([]);
@@ -83,24 +77,14 @@ describe('The Timeframes Service', function() {
   });
 
   describe('The create function', function() {
-    var create;
-
     var newTimeframe = {
       name: 'Today',
       type: 'now',
       formula: undefined
     };
 
-    before(function() {
-      create = sinon.stub(Timeframe, 'create');
-    });
-
-    after(function() {
-      create.restore();
-    });
-
     it('should resolve with an array containing the new timeframe object', function() {
-      create.withArgs(newTimeframe)
+      mocks.stubs.Timeframe.create.withArgs(newTimeframe)
         .returns(Promise.resolve({dataValues: newTimeframe}));
 
       return timeframeService.create(newTimeframe).should.eventually.deep.equal([newTimeframe]);
@@ -108,7 +92,7 @@ describe('The Timeframes Service', function() {
   });
 
   describe('The update function', function() {
-    var findById, row, update, idToUpdate;
+    var row, update, idToUpdate;
 
     var updatedTimeframe = {
       name: 'Today',
@@ -119,18 +103,16 @@ describe('The Timeframes Service', function() {
     idToUpdate = 1;
 
     before(function() {
-      findById = sinon.stub(Timeframe, 'findById');
       row = {update: function(){}};
       update = sinon.stub(row, 'update');
     });
 
     after(function() {
-      findById.restore();
       update.restore();
     });
 
     it('should resolve with an array containing the updated timeframe object', function() {
-      findById.withArgs(idToUpdate)
+      mocks.stubs.Timeframe.findById.withArgs(idToUpdate)
         .returns(Promise.resolve(row));
       update.withArgs(updatedTimeframe)
         .returns(Promise.resolve({dataValues: updatedTimeframe}));
@@ -139,7 +121,7 @@ describe('The Timeframes Service', function() {
     });
 
     it('should resolve with false if the id does not exist', function() {
-      findById.withArgs(idToUpdate)
+      mocks.stubs.Timeframe.findById.withArgs(idToUpdate)
         .returns(Promise.resolve(null));
 
       return timeframeService.update(idToUpdate, updatedTimeframe).should.eventually.be.false;
@@ -147,23 +129,21 @@ describe('The Timeframes Service', function() {
   });
 
   describe('The destroy function', function() {
-    var row, destroy, findById;
+    var row, destroy;
 
     var idToDestroy = 1;
 
     before(function() {
-      findById = sinon.stub(Timeframe, 'findById');
       row = {destroy: function(){}};
       destroy = sinon.stub(row, 'destroy');
     });
 
     after(function() {
-      findById.restore();
       destroy.restore();
     });
 
     it('should resolve with true when the row is destroyed', function() {
-      findById.withArgs(idToDestroy)
+      mocks.stubs.Timeframe.findById.withArgs(idToDestroy)
         .returns(Promise.resolve(row));
       destroy.withArgs()
         .returns(Promise.resolve(undefined));
@@ -172,7 +152,7 @@ describe('The Timeframes Service', function() {
     });
 
     it('should resolve with false id does not exist', function() {
-      findById.withArgs(idToDestroy)
+      mocks.stubs.Timeframe.findById.withArgs(idToDestroy)
         .returns(Promise.resolve(null));
 
       return timeframeService.destroy(idToDestroy).should.eventually.be.false;

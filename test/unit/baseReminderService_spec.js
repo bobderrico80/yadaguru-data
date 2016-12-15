@@ -1,19 +1,29 @@
+'use strict';
+
 var sinon = require('sinon');
 var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
 var sinonChai = require('sinon-chai');
+var proxyquire = require('proxyquire').noCallThru();
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 chai.should();
 
-var models = require('../../models');
-var BaseReminder = models.BaseReminder;
-var baseReminderService = require('../../services/baseReminderService');
-
 describe('The BaseReminders Service', function() {
+  var mocks = require('../mocks')('BaseReminder');
+  mocks.addResource('Timeframe');
+  var baseReminderService;
+
   var baseRemindersDbResponse, baseReminders;
 
   beforeEach(function() {
+    mocks.stubMethods('BaseReminder');
+    mocks.stubMethods('Timeframe');
+
+    baseReminderService = proxyquire('../../services/baseReminderService', {
+      '../models/': mocks.modelMock
+    });
+
     baseRemindersDbResponse = [{dataValues: {
       id: 1,
       name: 'Write Essays',
@@ -72,34 +82,26 @@ describe('The BaseReminders Service', function() {
   afterEach(function() {
     baseRemindersDbResponse = undefined;
     baseReminders = undefined;
+    mocks.restoreStubs('BaseReminder');
+    mocks.restoreStubs('Timeframe');
   });
 
   describe('The findAll function', function() {
-    var findAll;
-
-    beforeEach(function() {
-      findAll = sinon.stub(BaseReminder, 'findAll');
-    });
-
-    afterEach(function() {
-      findAll.restore();
-    });
-
     it('should resolve with an array of objects representing baseReminders', function() {
-      findAll.returns(Promise.resolve(baseRemindersDbResponse));
+      mocks.stubs.BaseReminder.findAll.returns(Promise.resolve(baseRemindersDbResponse));
 
       return baseReminderService.findAll().should.eventually.deep.equal(baseReminders);
     });
 
     it('should resolve with an empty array there are no baseReminders', function() {
-      findAll.returns(Promise.resolve([]));
+      mocks.stubs.BaseReminder.findAll.returns(Promise.resolve([]));
 
       return baseReminderService.findAll().should.eventually.deep.equal([]);
     });
   });
 
   describe('The findAllIncludingTimeframes function', function() {
-    var findAll, Timeframe, baseRemindersIncludingTimeframes;
+    var baseRemindersIncludingTimeframes;
 
     beforeEach(function() {
       baseRemindersIncludingTimeframes = [{
@@ -146,17 +148,10 @@ describe('The BaseReminders Service', function() {
           categoryId: 2
         }
       }];
-
-      findAll = sinon.stub(BaseReminder, 'findAll');
-      Timeframe = models.Timeframe;
-    });
-
-    afterEach(function() {
-      findAll.restore();
     });
 
     it('should resolve with baseReminder objects that include an array of Timeframes belonging to it', function() {
-      findAll.withArgs({include: Timeframe})
+      mocks.stubs.BaseReminder.findAll.withArgs({include: mocks.modelMock.Timeframe})
         .returns(Promise.resolve(baseRemindersIncludingTimeframes));
 
       var response = [{
@@ -200,25 +195,15 @@ describe('The BaseReminders Service', function() {
   });
 
   describe('The findById function', function() {
-    var findById;
-
-    beforeEach(function() {
-      findById = sinon.stub(BaseReminder, 'findById');
-    });
-
-    afterEach(function() {
-      findById.restore();
-    });
-
     it('should resolve with an array with the matching baseReminder object', function() {
-      findById.withArgs(1)
+      mocks.stubs.BaseReminder.findById.withArgs(1)
         .returns(Promise.resolve(baseRemindersDbResponse[0]));
 
       return baseReminderService.findById(1).should.eventually.deep.equal([baseReminders[0]]);
     });
 
     it('should resolve with an empty array if no baseReminders were found', function() {
-      findById.withArgs(3)
+      mocks.stubs.BaseReminder.findById.withArgs(3)
         .returns(Promise.resolve(null));
 
       return baseReminderService.findById(3).should.eventually.deep.equal([]);
@@ -226,7 +211,7 @@ describe('The BaseReminders Service', function() {
   });
 
   describe('The create function', function() {
-    var create, setTimeframes, newBaseReminderDbResponse, newTimeframeAssociations;
+    var setTimeframes, newBaseReminderDbResponse, newTimeframeAssociations;
 
     var newBaseReminder = {
       name: 'Write Essays',
@@ -261,19 +246,17 @@ describe('The BaseReminders Service', function() {
         }
       }]];
 
-      create = sinon.stub(BaseReminder, 'create');
       setTimeframes = sinon.stub(newBaseReminderDbResponse, 'setTimeframes');
     });
 
     afterEach(function() {
       newBaseReminderDbResponse = undefined;
       newTimeframeAssociations = undefined;
-      create.restore();
       setTimeframes.restore();
     });
 
     it('should resolve with an array containing the new baseReminder object', function() {
-      create.returns(Promise.resolve(newBaseReminderDbResponse));
+      mocks.stubs.BaseReminder.create.returns(Promise.resolve(newBaseReminderDbResponse));
       setTimeframes.returns(Promise.resolve(newTimeframeAssociations));
 
       return baseReminderService.create(newBaseReminder).should.eventually.deep.equal([newBaseReminder]);
@@ -281,7 +264,7 @@ describe('The BaseReminders Service', function() {
   });
 
   describe('The update function', function() {
-    var findById, update, setTimeframes, getTimeframes, associatedTimeframes, baseReminder,
+    var setTimeframes, getTimeframes, associatedTimeframes, baseReminder, update,
         updatedBaseReminderDbResponse, updatedTimeframeAssociations;
 
     var updatedBaseReminder = {
@@ -340,24 +323,21 @@ describe('The BaseReminders Service', function() {
         update: function(){}
       };
 
-
-      findById = sinon.stub(BaseReminder, 'findById');
-      update = sinon.stub(baseReminder, 'update');
       setTimeframes = sinon.stub(updatedBaseReminderDbResponse, 'setTimeframes');
       getTimeframes = sinon.stub(updatedBaseReminderDbResponse, 'getTimeframes');
+      update = sinon.stub(baseReminder, 'update');
     });
 
     afterEach(function() {
       updatedBaseReminderDbResponse = undefined;
       updatedTimeframeAssociations = undefined;
-      findById.restore();
-      update.restore();
       setTimeframes.restore();
       getTimeframes.restore();
+      update.restore();
     });
 
     it('should resolve with an array containing the updated baseReminder object', function() {
-      findById.returns(Promise.resolve(baseReminder));
+      mocks.stubs.BaseReminder.findById.returns(Promise.resolve(baseReminder));
       update.returns(Promise.resolve(updatedBaseReminderDbResponse));
       setTimeframes.returns(Promise.resolve(updatedTimeframeAssociations));
 
@@ -365,7 +345,7 @@ describe('The BaseReminders Service', function() {
     });
 
     it('should resolve with an array containing the updated baseReminder object, even if timeframes are not updated', function() {
-      findById.returns(Promise.resolve(baseReminder));
+      mocks.stubs.BaseReminder.findById.returns(Promise.resolve(baseReminder));
       update.returns(Promise.resolve(updatedBaseReminderDbResponse));
       getTimeframes.returns(Promise.resolve(associatedTimeframes));
 
@@ -373,17 +353,16 @@ describe('The BaseReminders Service', function() {
     });
 
     it('should resolve with false if the id does not exist', function() {
-      findById.returns(Promise.resolve(null));
+      mocks.stubs.BaseReminder.findById.returns(Promise.resolve(null));
 
       return baseReminderService.update(1, updatedBaseReminder).should.eventually.be.false;
     });
   });
 
   describe('The destroy function', function() {
-    var baseReminder, destroy, findById, setTimeframes;
+    var baseReminder, destroy, setTimeframes;
 
     beforeEach(function() {
-      findById = sinon.stub(BaseReminder, 'findById');
       baseReminder = {
         destroy: function(){},
         setTimeframes: function(){}
@@ -393,13 +372,12 @@ describe('The BaseReminders Service', function() {
     });
 
     afterEach(function() {
-      findById.restore();
       destroy.restore();
       setTimeframes.restore();
     });
 
     it('should resolve with true when the row is destroyed', function() {
-      findById.returns(Promise.resolve(baseReminder));
+      mocks.stubs.BaseReminder.findById.returns(Promise.resolve(baseReminder));
       setTimeframes.returns(Promise.resolve());
       destroy.returns(Promise.resolve(undefined));
 
@@ -407,7 +385,7 @@ describe('The BaseReminders Service', function() {
     });
 
     it('should resolve with false id does not exist', function() {
-      findById.returns(Promise.resolve(null));
+      mocks.stubs.BaseReminder.findById.returns(Promise.resolve(null));
 
       return baseReminderService.destroy(1).should.eventually.be.false;
     });

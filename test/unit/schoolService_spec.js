@@ -1,16 +1,18 @@
+'use strict';
+
 var sinon = require('sinon');
 var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
 var sinonChai = require('sinon-chai');
+var proxyquire = require('proxyquire').noCallThru();
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 chai.should();
 
-var models = require('../../models');
-var School = models.School;
-var schoolService = require('../../services/schoolService');
-
 describe('The Schools Service', function() {
+  var mocks = require('../mocks')('School');
+  var schoolService;
+
   var schools =[{
     id: '1',
     userId: '1',
@@ -24,20 +26,22 @@ describe('The Schools Service', function() {
     dueDate: '2017-02-01',
     isActive: true
   }];
+  
+  beforeEach(function() {
+    mocks.stubMethods();
+
+    schoolService = proxyquire('../../services/schoolService', {
+      '../models/': mocks.modelMock
+    });
+  });
+
+  afterEach(function() {
+    mocks.restoreStubs();
+  });
 
   describe('The findByUser function', function() {
-    var findAll;
-
-    before(function() {
-      findAll = sinon.stub(School, 'findAll');
-    });
-
-    after(function() {
-      findAll.restore();
-    });
-
     it('should resolve with an array of objects representing schools', function() {
-      findAll.returns(Promise.resolve(schools.map(
+      mocks.stubs.School.findAll.returns(Promise.resolve(schools.map(
         function(school) {
           return {dataValues: school};
         }
@@ -47,32 +51,22 @@ describe('The Schools Service', function() {
     });
 
     it('should resolve with an empty array there are no schools', function() {
-      findAll.returns(Promise.resolve([]));
+      mocks.stubs.School.findAll.returns(Promise.resolve([]));
 
       return schoolService.findAll().should.eventually.deep.equal([]);
     });
   });
 
   describe('The findByIdForUser function', function() {
-    var findOne;
-
-    before(function() {
-      findOne = sinon.stub(School, 'findOne');
-    });
-
-    after(function() {
-      findOne.restore();
-    });
-
     it('should resolve with an array with the matching school object', function() {
-      findOne.withArgs({where: {id: 1, userId: 1}})
+      mocks.stubs.School.findOne.withArgs({where: {id: 1, userId: 1}})
         .returns(Promise.resolve({dataValues: schools[0]}));
 
       return schoolService.findByIdForUser(1, 1).should.eventually.deep.equal([schools[0]]);
     });
 
     it('should resolve with an empty array if no schools were found', function() {
-      findOne.withArgs({where: {id: 2, userId: 1}})
+      mocks.stubs.School.findOne.withArgs({where: {id: 2, userId: 1}})
         .returns(Promise.resolve(null));
 
       return schoolService.findByIdForUser(2, 1).should.eventually.deep.equal([]);
@@ -80,8 +74,6 @@ describe('The Schools Service', function() {
   });
 
   describe('The create function', function() {
-    var create;
-
     var newSchool = {
       userId: '1',
       name: 'Temple',
@@ -89,16 +81,8 @@ describe('The Schools Service', function() {
       isActive: true
     };
 
-    before(function() {
-      create = sinon.stub(School, 'create');
-    });
-
-    after(function() {
-      create.restore();
-    });
-
     it('should resolve with an array containing the new school object', function() {
-      create.withArgs(newSchool)
+      mocks.stubs.School.create.withArgs(newSchool)
         .returns(Promise.resolve({dataValues: newSchool}));
 
       return schoolService.create(newSchool).should.eventually.deep.equal([newSchool]);
@@ -106,7 +90,7 @@ describe('The Schools Service', function() {
   });
 
   describe('The updateForUser function', function() {
-    var findOne, row, update, idToUpdate;
+    var row, update, idToUpdate;
 
     var updatedSchool = {
         userId: 1,
@@ -117,19 +101,17 @@ describe('The Schools Service', function() {
 
     idToUpdate = 1;
 
-    before(function() {
-      findOne = sinon.stub(School, 'findOne');
+    beforeEach(function() {
       row = {update: function(){}};
       update = sinon.stub(row, 'update');
     });
 
-    after(function() {
-      findOne.restore();
+    afterEach(function() {
       update.restore();
     });
 
     it('should resolve with an array containing the updated school object', function() {
-      findOne.withArgs({where: {id: 1, userId: 1}})
+      mocks.stubs.School.findOne.withArgs({where: {id: 1, userId: 1}})
         .returns(Promise.resolve(row));
       update.withArgs(updatedSchool)
         .returns(Promise.resolve({dataValues: updatedSchool}));
@@ -139,7 +121,7 @@ describe('The Schools Service', function() {
     });
 
     it('should resolve with false if the id does not exist', function() {
-      findOne.withArgs({where: {id: 2, userId: 1}})
+      mocks.stubs.School.findOne.withArgs({where: {id: 2, userId: 1}})
         .returns(Promise.resolve(null));
 
       return schoolService.updateForUser(2, updatedSchool, 1).should.eventually.be.false;
@@ -147,21 +129,19 @@ describe('The Schools Service', function() {
   });
 
   describe('The destroyForUser function', function() {
-    var row, destroy, findOne;
+    var row, destroy;
 
-    before(function() {
-      findOne = sinon.stub(School, 'findOne');
+    beforeEach(function() {
       row = {destroy: function(){}};
       destroy = sinon.stub(row, 'destroy');
     });
 
-    after(function() {
-      findOne.restore();
+    afterEach(function() {
       destroy.restore();
     });
 
     it('should resolve with true when the row is destroyed', function() {
-      findOne.withArgs({where: {id: 1, userId: 1}})
+      mocks.stubs.School.findOne.withArgs({where: {id: 1, userId: 1}})
         .returns(Promise.resolve(row));
       destroy.withArgs()
         .returns(Promise.resolve(undefined));
@@ -170,7 +150,7 @@ describe('The Schools Service', function() {
     });
 
     it('should resolve with false id does not exist', function() {
-      findOne.withArgs({where: {id: 2, userId: 1}})
+      mocks.stubs.School.findOne.withArgs({where: {id: 2, userId: 1}})
         .returns(Promise.resolve(null));
 
       return schoolService.destroyForUser(2, 1).should.eventually.be.false;

@@ -1,7 +1,10 @@
+'use strict';
+
 var sinon = require('sinon');
 var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
 var sinonChai = require('sinon-chai');
+var proxyquire = require('proxyquire').noCallThru();
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 chai.should();
@@ -11,6 +14,9 @@ var Test = models.Test;
 var testService = require('../../services/testService');
 
 describe('The Tests Service', function() {
+  var mocks = require('../mocks')('Test');
+  var testService;
+
   var tests =[{
     id: 1,
     type: 'SAT',
@@ -26,20 +32,22 @@ describe('The Tests Service', function() {
     adminMessage: 'A message about the test',
     adminDetail: 'Some details'
   }];
+  
+  beforeEach(function() {
+    mocks.stubMethods();
+
+    testService = proxyquire('../../services/testService', {
+      '../models/': mocks.modelMock
+    });
+  });
+
+  afterEach(function() {
+    mocks.restoreStubs();
+  });
 
   describe('The findAll function', function() {
-    var findAll;
-
-    before(function() {
-      findAll = sinon.stub(Test, 'findAll');
-    });
-
-    after(function() {
-      findAll.restore();
-    });
-
     it('should resolve with an array of objects representing tests', function() {
-      findAll.returns(Promise.resolve(tests.map(
+      mocks.stubs.Test.findAll.returns(Promise.resolve(tests.map(
         function(test) {
           return {dataValues: test};
         }
@@ -49,32 +57,22 @@ describe('The Tests Service', function() {
     });
 
     it('should resolve with an empty array there are no tests', function() {
-      findAll.returns(Promise.resolve([]));
+      mocks.stubs.Test.findAll.returns(Promise.resolve([]));
 
       return testService.findAll().should.eventually.deep.equal([]);
     });
   });
 
   describe('The findById function', function() {
-    var findById;
-
-    before(function() {
-      findById = sinon.stub(Test, 'findById');
-    });
-
-    after(function() {
-      findById.restore();
-    });
-
     it('should resolve with an array with the matching test object', function() {
-      findById.withArgs(1)
+      mocks.stubs.Test.findById.withArgs(1)
         .returns(Promise.resolve({dataValues: tests[0]}));
 
       return testService.findById(1).should.eventually.deep.equal([tests[0]]);
     });
 
     it('should resolve with an empty array if no tests were found', function() {
-      findById.withArgs(3)
+      mocks.stubs.Test.findById.withArgs(3)
         .returns(Promise.resolve(null));
 
       return testService.findById(3).should.eventually.deep.equal([]);
@@ -82,8 +80,6 @@ describe('The Tests Service', function() {
   });
 
   describe('The create function', function() {
-    var create;
-
     var newTest = {
       type: 'SAT',
       registrationMessage: 'A message about registering',
@@ -92,16 +88,8 @@ describe('The Tests Service', function() {
       adminDetail: 'Some details'
     };
 
-    before(function() {
-      create = sinon.stub(Test, 'create');
-    });
-
-    after(function() {
-      create.restore();
-    });
-
     it('should resolve with an array containing the new test object', function() {
-      create.withArgs(newTest)
+      mocks.stubs.Test.create.withArgs(newTest)
         .returns(Promise.resolve({dataValues: newTest}));
 
       return testService.create(newTest).should.eventually.deep.equal([newTest]);
@@ -109,7 +97,7 @@ describe('The Tests Service', function() {
   });
 
   describe('The update function', function() {
-    var findById, row, update, idToUpdate;
+    var row, update, idToUpdate;
 
     var updatedTest = {
       type: 'SAT',
@@ -121,19 +109,17 @@ describe('The Tests Service', function() {
 
     idToUpdate = 1;
 
-    before(function() {
-      findById = sinon.stub(Test, 'findById');
+    beforeEach(function() {
       row = {update: function(){}};
       update = sinon.stub(row, 'update');
     });
 
-    after(function() {
-      findById.restore();
+    afterEach(function() {
       update.restore();
     });
 
     it('should resolve with an array containing the updated test object', function() {
-      findById.withArgs(idToUpdate)
+      mocks.stubs.Test.findById.withArgs(idToUpdate)
         .returns(Promise.resolve(row));
       update.withArgs(updatedTest)
         .returns(Promise.resolve({dataValues: updatedTest}));
@@ -142,7 +128,7 @@ describe('The Tests Service', function() {
     });
 
     it('should resolve with false if the id does not exist', function() {
-      findById.withArgs(idToUpdate)
+      mocks.stubs.Test.findById.withArgs(idToUpdate)
         .returns(Promise.resolve(null));
 
       return testService.update(idToUpdate, updatedTest).should.eventually.be.false;
@@ -150,23 +136,21 @@ describe('The Tests Service', function() {
   });
 
   describe('The destroy function', function() {
-    var row, destroy, findById;
+    var row, destroy;
 
     var idToDestroy = 1;
 
-    before(function() {
-      findById = sinon.stub(Test, 'findById');
+    beforeEach(function() {
       row = {destroy: function(){}};
       destroy = sinon.stub(row, 'destroy');
     });
 
-    after(function() {
-      findById.restore();
+    afterEach(function() {
       destroy.restore();
     });
 
     it('should resolve with true when the row is destroyed', function() {
-      findById.withArgs(idToDestroy)
+      mocks.stubs.Test.findById.withArgs(idToDestroy)
         .returns(Promise.resolve(row));
       destroy.withArgs()
         .returns(Promise.resolve(undefined));
@@ -175,7 +159,7 @@ describe('The Tests Service', function() {
     });
 
     it('should resolve with false id does not exist', function() {
-      findById.withArgs(idToDestroy)
+      mocks.stubs.Test.findById.withArgs(idToDestroy)
         .returns(Promise.resolve(null));
 
       return testService.destroy(idToDestroy).should.eventually.be.false;

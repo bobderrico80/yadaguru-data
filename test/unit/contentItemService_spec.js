@@ -1,7 +1,10 @@
+'use strict';
+
 var sinon = require('sinon');
 var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
 var sinonChai = require('sinon-chai');
+var proxyquire = require('proxyquire').noCallThru();
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 chai.should();
@@ -11,6 +14,9 @@ var ContentItem = models.ContentItem;
 var contentItemService = require('../../services/contentItemService');
 
 describe('The ContentItems Service', function() {
+  var mocks = require('../mocks')('ContentItem');
+  var contentItemService;
+
   var contentItems =[{
     id: 1,
     name: 'faqs',
@@ -20,20 +26,23 @@ describe('The ContentItems Service', function() {
     name: 'privacy',
     content: 'Our privacy policy...'
   }];
+  
+  beforeEach(function() {
+    mocks.stubMethods();
+
+    contentItemService = proxyquire('../../services/contentItemService', {
+      '../models/': mocks.modelMock
+    });
+  });
+
+  afterEach(function() {
+    mocks.restoreStubs();
+  });
+
 
   describe('The findAll function', function() {
-    var findAll;
-
-    before(function() {
-      findAll = sinon.stub(ContentItem, 'findAll');
-    });
-
-    after(function() {
-      findAll.restore();
-    });
-
     it('should resolve with an array of objects representing contentItems', function() {
-      findAll.returns(Promise.resolve(contentItems.map(
+      mocks.stubs.ContentItem.findAll.returns(Promise.resolve(contentItems.map(
         function(contentItem) {
           return {dataValues: contentItem};
         }
@@ -43,32 +52,22 @@ describe('The ContentItems Service', function() {
     });
 
     it('should resolve with an empty array there are no contentItems', function() {
-      findAll.returns(Promise.resolve([]));
+      mocks.stubs.ContentItem.findAll.returns(Promise.resolve([]));
 
       return contentItemService.findAll().should.eventually.deep.equal([]);
     });
   });
 
   describe('The findById function', function() {
-    var findAll;
-
-    before(function() {
-      findAll = sinon.stub(ContentItem, 'findAll');
-    });
-
-    after(function() {
-      findAll.restore();
-    });
-
     it('should resolve with an array with the matching contentItem object', function() {
-      findAll.withArgs({where: {name: 'faqs'}})
+      mocks.stubs.ContentItem.findAll.withArgs({where: {name: 'faqs'}})
         .returns(Promise.resolve([{dataValues: contentItems[0]}]));
 
       return contentItemService.findByName('faqs').should.eventually.deep.equal([contentItems[0]]);
     });
 
     it('should resolve with an empty array if no contentItems were found', function() {
-      findAll.withArgs({where: {name: 'foobar'}})
+      mocks.stubs.ContentItem.findAll.withArgs({where: {name: 'foobar'}})
         .returns(Promise.resolve([]));
 
       return contentItemService.findByName('foobar').should.eventually.deep.equal([]);
@@ -76,23 +75,13 @@ describe('The ContentItems Service', function() {
   });
 
   describe('The create function', function() {
-    var create;
-
     var newContentItem = {
       name: 'A tip',
       content: 'Some details'
     };
 
-    before(function() {
-      create = sinon.stub(ContentItem, 'create');
-    });
-
-    after(function() {
-      create.restore();
-    });
-
     it('should resolve with an array containing the new contentItem object', function() {
-      create.withArgs(newContentItem)
+      mocks.stubs.ContentItem.create.withArgs(newContentItem)
         .returns(Promise.resolve({dataValues: newContentItem}));
 
       return contentItemService.create(newContentItem).should.eventually.deep.equal([newContentItem]);
@@ -100,7 +89,7 @@ describe('The ContentItems Service', function() {
   });
 
   describe('The update function', function() {
-    var findById, row, update, idToUpdate;
+    var row, update, idToUpdate;
 
     var updatedContentItem = {
       name: 'A tip',
@@ -109,19 +98,17 @@ describe('The ContentItems Service', function() {
 
     idToUpdate = 1;
 
-    before(function() {
-      findById = sinon.stub(ContentItem, 'findById');
+    beforeEach(function() {
       row = {update: function(){}};
       update = sinon.stub(row, 'update');
     });
 
-    after(function() {
-      findById.restore();
+    afterEach(function() {
       update.restore();
     });
 
     it('should resolve with an array containing the updated contentItem object', function() {
-      findById.withArgs(idToUpdate)
+      mocks.stubs.ContentItem.findById.withArgs(idToUpdate)
         .returns(Promise.resolve(row));
       update.withArgs(updatedContentItem)
         .returns(Promise.resolve({dataValues: updatedContentItem}));
@@ -130,7 +117,7 @@ describe('The ContentItems Service', function() {
     });
 
     it('should resolve with false if the id does not exist', function() {
-      findById.withArgs(idToUpdate)
+      mocks.stubs.ContentItem.findById.withArgs(idToUpdate)
         .returns(Promise.resolve(null));
 
       return contentItemService.update(idToUpdate, updatedContentItem).should.eventually.be.false;
@@ -138,23 +125,21 @@ describe('The ContentItems Service', function() {
   });
 
   describe('The destroy function', function() {
-    var row, destroy, findById;
+    var row, destroy;
 
     var idToDestroy = 1;
 
-    before(function() {
-      findById = sinon.stub(ContentItem, 'findById');
+    beforeEach(function() {
       row = {destroy: function(){}};
       destroy = sinon.stub(row, 'destroy');
     });
 
-    after(function() {
-      findById.restore();
+    afterEach(function() {
       destroy.restore();
     });
 
     it('should resolve with true when the row is destroyed', function() {
-      findById.withArgs(idToDestroy)
+      mocks.stubs.ContentItem.findById.withArgs(idToDestroy)
         .returns(Promise.resolve(row));
       destroy.withArgs()
         .returns(Promise.resolve(undefined));
@@ -163,7 +148,7 @@ describe('The ContentItems Service', function() {
     });
 
     it('should resolve with false id does not exist', function() {
-      findById.withArgs(idToDestroy)
+      mocks.stubs.ContentItem.findById.withArgs(idToDestroy)
         .returns(Promise.resolve(null));
 
       return contentItemService.destroy(idToDestroy).should.eventually.be.false;
