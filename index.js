@@ -6,7 +6,7 @@ module.exports = function(config) {
   dbServices.models = models;
 
   return [
-    'dbService',
+    'categoryService',
     'baseReminderService',
     'timeframeService',
     'testService',
