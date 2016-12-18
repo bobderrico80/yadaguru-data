@@ -9,8 +9,6 @@ chai.use(chaiAsPromised);
 chai.use(sinonChai);
 chai.should();
 
-var bcrypt = require('bcryptjs');
-
 describe('The AdminUsers Service', function() {
   var mocks, adminUserService;
   
@@ -20,9 +18,8 @@ describe('The AdminUsers Service', function() {
     mocks.stubMethods();
 
     adminUserService = proxyquire('../../services/adminUserService', {
-      '../models/': mocks.modelMock,
       'bcryptjs': mocks.bcryptMock
-    });
+    })(mocks.modelMock);
   });
 
   afterEach(function() {

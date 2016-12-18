@@ -4,7 +4,6 @@ var sinon = require('sinon');
 var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
 var sinonChai = require('sinon-chai');
-var proxyquire = require('proxyquire').noCallThru();
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 chai.should();
@@ -30,9 +29,7 @@ describe('The ContentItems Service', function() {
   beforeEach(function() {
     mocks.stubMethods();
 
-    contentItemService = proxyquire('../../services/contentItemService', {
-      '../models/': mocks.modelMock
-    });
+    contentItemService = require('../../services/contentItemService')(mocks.modelMock);
   });
 
   afterEach(function() {

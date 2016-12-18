@@ -86,14 +86,12 @@ module.exports = (function() {
       phoneNumber: '9876543210'
     }],
     tests: [{
-      id: '1',
       type: 'SAT',
       registrationMessage: 'SAT registration message',
       registrationDetail: 'SAT registration detail',
       adminMessage: 'SAT admin message',
       adminDetail: 'SAT admin detail'
     }, {
-      id: '2',
       type: 'ACT',
       registrationMessage: 'ACT registration message',
       registrationDetail: 'ACT registration detail',
@@ -103,11 +101,18 @@ module.exports = (function() {
     testDates: [{
       testId: '1',
       registrationDate: '2017-01-01',
-      adminDate: '2017-02-01',
+      adminDate: '2017-02-01'
     }, {
       testId: '2',
       registrationDate: '2017-01-15',
       adminDate: '2017-02-15'
+    }],
+    contentItems: [{
+      name: 'privacy',
+      content: 'Privacy Policy'
+    }, {
+      name: 'terms',
+      content: 'Terms and Conditions'
     }],
     createMockData: function(models) {
       var self = this;
@@ -121,16 +126,18 @@ module.exports = (function() {
                     return br.setTimeframes([3]).then(function() {
                       return models.Reminder.bulkCreate(self.reminders).then(function() {
                         return models.Test.bulkCreate(self.tests).then(function() {
-                          return models.TestDate.bulkCreate(self.testDates);
+                          return models.TestDate.bulkCreate(self.testDates).then(function() {
+                            return models.ContentItem.bulkCreate(self.contentItems);
+                          });
                         })
                       });
                     });
-                  })
-                })
-              })
-            })
-          })
-        })
+                  });
+                });
+              });
+            });
+          });
+        });
       })
     }
   }

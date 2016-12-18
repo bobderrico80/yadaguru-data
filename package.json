@@ -1,6 +1,6 @@
 {
   "name": "yadaguru-data",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Data model service for Yadaguru services",
   "repository": {
     "type": "git",

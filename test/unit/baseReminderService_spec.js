@@ -4,7 +4,6 @@ var sinon = require('sinon');
 var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
 var sinonChai = require('sinon-chai');
-var proxyquire = require('proxyquire').noCallThru();
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 chai.should();
@@ -20,9 +19,7 @@ describe('The BaseReminders Service', function() {
     mocks.stubMethods('BaseReminder');
     mocks.stubMethods('Timeframe');
 
-    baseReminderService = proxyquire('../../services/baseReminderService', {
-      '../models/': mocks.modelMock
-    });
+    baseReminderService = require('../../services/baseReminderService')(mocks.modelMock);
 
     baseRemindersDbResponse = [{dataValues: {
       id: 1,

@@ -4,7 +4,6 @@ var sinon = require('sinon');
 var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
 var sinonChai = require('sinon-chai');
-var proxyquire = require('proxyquire').noCallThru();
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 chai.should();
@@ -127,9 +126,7 @@ describe('The Reminders Service', function() {
   beforeEach(function() {
     mocks.stubMethods();
 
-    reminderService = proxyquire('../../services/reminderService', {
-      '../models/': mocks.modelMock
-    });
+    reminderService = require('../../services/reminderService')(mocks.modelMock);
   });
 
   afterEach(function() {
