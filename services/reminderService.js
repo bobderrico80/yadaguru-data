@@ -32,6 +32,26 @@ module.exports = function(models) {
     }
   }
 
+  reminderService.findByDateWithBaseReminders = function(date) {
+    return Reminder.findAll({
+      where: {
+        dueDate: date
+      },
+      include: [{
+        model: BaseReminder,
+        include: {
+          model: Category
+        }
+      }, {
+        model: School
+      }]
+    }).then(function(rows) {
+      return rows.map(function(row) {
+        return getReminderResponse(row);
+      })
+    })
+  }
+
   reminderService.findByUserWithBaseReminders = function(userId) {
     return Reminder.findAll({
       where: {

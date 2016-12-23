@@ -9,6 +9,7 @@ chai.use(sinonChai);
 chai.should();
 var mockData = require('../mockData');
 var config = require('../testConfig');
+var moment = require('moment');
 var dbServices;
 var reminderService;
 
@@ -24,6 +25,20 @@ describe('The reminderService', function() {
           });
       });
   });
+
+  it('should get all reminders for a specific date, with joined data', function() {
+    return reminderService.findByDateWithBaseReminders(moment.utc('2016-09-01').format()).then(function(reminders) {
+      reminders.length.should.equal(2);
+      reminders[0].dueDate.should.equal('2016-09-01');
+      reminders[1].dueDate.should.equal('2016-09-01');
+    });
+  });
+
+  it('should return an empty array of no reminders are found for a specific date', function() {
+    return reminderService.findByDateWithBaseReminders(moment.utc().format()).then(function(reminders) {
+      reminders.length.should.equal(0);
+    })
+  })
 
   it('should get all reminders for a user, with joined data', function() {
     return reminderService.findByUserWithBaseReminders(1).then(function(reminders) {

@@ -4,6 +4,7 @@ var sinon = require('sinon');
 var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
 var sinonChai = require('sinon-chai');
+var moment = require('moment');
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 chai.should();
@@ -132,6 +133,33 @@ describe('The Reminders Service', function() {
   afterEach(function() {
     mocks.restoreStubs();
   });
+
+  describe('The findByDateWithBaseReminders function', function() {
+    it('should resolve with a flattened array of reminders for a given date', function() {
+      var date = '2017-02-01';
+      mocks.stubs.Reminder.findAll.withArgs({
+          where: {
+            dueDate: date
+          },
+          include: [{
+            model: mocks.modelMock.BaseReminder,
+            include: {
+              model: mocks.modelMock.Category
+            }
+          }, {
+            model: mocks.modelMock.School
+          }]
+      }).returns(Promise.resolve(dbResponse));
+
+      return reminderService.findByDateWithBaseReminders(date).should.eventually.deep.equal(returnedResult);
+    })
+
+    it('should resolve with an empty array there are no reminders', function() {
+      mocks.stubs.Reminder.findAll.returns(Promise.resolve([]));
+
+      return reminderService.findByDateWithBaseReminders('2017-02-01').should.eventually.deep.equal([]);
+    });
+  })
 
   describe('The findByUserWithBaseReminders function', function() {
     it('should resolve with a flattened array of reminders joined with base reminders, joined with categories', function() {
