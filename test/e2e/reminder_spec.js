@@ -37,8 +37,8 @@ describe('The reminderService', function() {
   it('should return an empty array of no reminders are found for a specific date', function() {
     return reminderService.findByDateWithBaseReminders(moment.utc().format()).then(function(reminders) {
       reminders.length.should.equal(0);
-    })
-  })
+    });
+  });
 
   it('should get all reminders for a user, with joined data', function() {
     return reminderService.findByUserWithBaseReminders(1).then(function(reminders) {
@@ -46,6 +46,7 @@ describe('The reminderService', function() {
       reminders[0].name.should.equal('Write Essay');
       reminders[0].category.should.equal('Essays');
       reminders[0].schoolName.should.equal('Temple');
+      reminders[0].userId.should.equal(1);
     });
   });
 

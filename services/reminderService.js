@@ -28,7 +28,8 @@ module.exports = function(models) {
       baseReminderId: row.dataValues.BaseReminder.dataValues.id,
       schoolName: row.dataValues.School.dataValues.name,
       schoolId: row.dataValues.School.dataValues.id,
-      schoolDueDate: row.dataValues.School.dataValues.dueDate
+      schoolDueDate: row.dataValues.School.dataValues.dueDate,
+      userId: row.dataValues.userId
     }
   }
 
