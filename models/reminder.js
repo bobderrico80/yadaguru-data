@@ -12,7 +12,7 @@ module.exports = function(sequelize, DataTypes) {
     isSent: {
       allowNull: false,
       type: DataTypes.BOOLEAN,
-      default: false
+      defaultValue: false
     }
   }, {
     classMethods: {
