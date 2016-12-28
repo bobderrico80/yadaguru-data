@@ -37,37 +37,43 @@ module.exports = (function() {
       schoolId: '1',
       baseReminderId: '1',
       dueDate: '2016-09-01',
-      timeframe: 'Today'
+      timeframe: 'Today',
+      isSent: false
     }, {
       userId: '1',
       schoolId: '1',
       baseReminderId: '1',
       dueDate: '2017-01-02',
-      timeframe: '30 Days Before'
+      timeframe: '30 Days Before',
+      isSent: false
     }, {
       userId: '1',
       schoolId: '1',
       baseReminderId: '2',
       dueDate: '2017-01-01',
-      timeframe: 'January 1'
+      timeframe: 'January 1',
+      isSent: false
     }, {
       userId: '1',
       schoolId: '2',
       baseReminderId: '1',
       dueDate: '2016-09-01',
-      timeframe: 'Today'
+      timeframe: 'Today',
+      isSent: false
     }, {
       userId: '1',
       schoolId: '2',
       baseReminderId: '1',
       dueDate: '2017-01-02',
-      timeframe: '30 Days Before'
+      timeframe: '30 Days Before',
+      isSent: false
     }, {
       userId: '1',
       schoolId: '2',
       baseReminderId: '2',
       dueDate: '2017-01-01',
-      timeframe: 'January 1'
+      timeframe: 'January 1',
+      isSent: false
     }],
     schools: [{
       userId: '1',

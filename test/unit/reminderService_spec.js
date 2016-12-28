@@ -19,6 +19,7 @@ describe('The Reminders Service', function() {
   var dbResponse = [{
     dataValues: {
       id: '1',
+      userId: '1',
       dueDate: '2017-02-01',
       timeframe: 'One week before',
       BaseReminder: {
@@ -49,6 +50,7 @@ describe('The Reminders Service', function() {
   }, {
     dataValues: {
       id: '2',
+      userId: '1',
       dueDate: '2017-02-01',
       timeframe: 'One week before',
       BaseReminder: {
@@ -91,7 +93,8 @@ describe('The Reminders Service', function() {
     baseReminderId: '1',
     schoolName: 'Temple',
     schoolId: '1',
-    schoolDueDate: '2017-02-01'
+    schoolDueDate: '2017-02-01',
+    userId: '1'
   }, {
     id: '2',
     dueDate: '2017-02-01',
@@ -105,7 +108,8 @@ describe('The Reminders Service', function() {
     baseReminderId: '2',
     schoolName: 'Temple',
     schoolId: '1',
-    schoolDueDate: '2017-02-01'
+    schoolDueDate: '2017-02-01',
+    userId: '1'
   }];
 
   var reminders =[{

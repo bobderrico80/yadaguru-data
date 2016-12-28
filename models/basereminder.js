@@ -5,6 +5,9 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING,
       allowNull: false
     },
+    smsMessage: {
+      type: DataTypes.STRING,
+    },
     message: {
       type: DataTypes.TEXT,
       allowNull: false

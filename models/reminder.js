@@ -8,6 +8,11 @@ module.exports = function(sequelize, DataTypes) {
     dueDate: {
       allowNull: false,
       type: DataTypes.DATE
+    },
+    isSent: {
+      allowNull: false,
+      type: DataTypes.BOOLEAN,
+      default: false
     }
   }, {
     classMethods: {
