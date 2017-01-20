@@ -34,6 +34,15 @@ describe('The reminderService', function() {
     });
   });
 
+  it('should get all reminders for a user for a specific date, with joined data', function() {
+    return reminderService.findByDateForUserWithBaseReminders(moment.utc('2016-09-01').format(), 1).then(function(reminders) {
+      reminders.length.should.equal(2);
+      reminders[0].dueDate.should.equal('2016-09-01');
+      reminders[1].dueDate.should.equal('2016-09-01');
+    });
+  });
+
+
   it('should return an empty array of no reminders are found for a specific date', function() {
     return reminderService.findByDateWithBaseReminders(moment.utc().format()).then(function(reminders) {
       reminders.length.should.equal(0);

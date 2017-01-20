@@ -165,6 +165,35 @@ describe('The Reminders Service', function() {
     });
   })
 
+  describe('The findByDateForUserWithBaseReminders function', function() {
+    it('should resolve with a flattened array of reminders for a given date', function() {
+      var date = '2017-02-01';
+      var userId = 1;
+      mocks.stubs.Reminder.findAll.withArgs({
+          where: {
+            dueDate: date,
+            userId: userId
+          },
+          include: [{
+            model: mocks.modelMock.BaseReminder,
+            include: {
+              model: mocks.modelMock.Category
+            }
+          }, {
+            model: mocks.modelMock.School
+          }]
+      }).returns(Promise.resolve(dbResponse));
+
+      return reminderService.findByDateForUserWithBaseReminders(date, userId).should.eventually.deep.equal(returnedResult);
+    })
+
+    it('should resolve with an empty array there are no reminders', function() {
+      mocks.stubs.Reminder.findAll.returns(Promise.resolve([]));
+
+      return reminderService.findByDateWithBaseReminders('2017-02-01').should.eventually.deep.equal([]);
+    });
+  })
+
   describe('The findByUserWithBaseReminders function', function() {
     it('should resolve with a flattened array of reminders joined with base reminders, joined with categories', function() {
       mocks.stubs.Reminder.findAll.withArgs({
