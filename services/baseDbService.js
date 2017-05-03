@@ -17,9 +17,7 @@ var baseDbService = function(Model, outputSanitizer) {
 
   var findAll = function() {
     return Model.findAll().then(function(rows) {
-      return _sanitizeOutput(rows.map(function(row) {
-        return row.dataValues;
-      }));
+      return _sanitizeOutput(rows);
     })
   };
 
@@ -30,9 +28,7 @@ var baseDbService = function(Model, outputSanitizer) {
       if (rows.length === 0) {
         return rows;
       }
-      return _sanitizeOutput(rows.map(function(row) {
-        return row.dataValues;
-      }));
+      return _sanitizeOutput(rows);
     })
   };
 
@@ -44,9 +40,7 @@ var baseDbService = function(Model, outputSanitizer) {
       if (rows.length === 0) {
         return rows;
       }
-      return _sanitizeOutput(rows.map(function(row) {
-        return row.dataValues;
-      }));
+      return _sanitizeOutput(rows);
     })
   };
 
@@ -56,7 +50,7 @@ var baseDbService = function(Model, outputSanitizer) {
       if (!row) {
         return [];
       }
-      return _sanitizeOutput(row.dataValues);
+      return _sanitizeOutput(row);
     })
   };
 
@@ -65,15 +59,13 @@ var baseDbService = function(Model, outputSanitizer) {
       if (row.length === 0) {
         return [];
       }
-      return _sanitizeOutput(row[0].dataValues);
+      return _sanitizeOutput(row[0]);
     })
   };
 
   var findByUser = function(userId) {
     return Model.findAll({where: {userId: userId}}).then(function(rows) {
-      return _sanitizeOutput(rows.map(function(row) {
-        return row.dataValues;
-      }))
+      return _sanitizeOutput(rows)
     })
   };
 
@@ -82,13 +74,13 @@ var baseDbService = function(Model, outputSanitizer) {
       if (!row) {
         return [];
       }
-      return _sanitizeOutput(row.dataValues);
+      return _sanitizeOutput(row);
     })
   };
 
   var create = function(data) {
     return Model.create(data).then(function(newRow) {
-      return _sanitizeOutput(newRow.dataValues);
+      return _sanitizeOutput(newRow);
     })
   };
 
@@ -104,7 +96,7 @@ var baseDbService = function(Model, outputSanitizer) {
         return Promise.resolve(false);
       }
       return row.update(data).then(function(updatedRow) {
-        return _sanitizeOutput(updatedRow.dataValues);
+        return _sanitizeOutput(updatedRow);
       })
     });
   };
@@ -115,7 +107,7 @@ var baseDbService = function(Model, outputSanitizer) {
         return Promise.resolve(false);
       }
       return row.update(data).then(function(updatedRow) {
-        return _sanitizeOutput(updatedRow.dataValues);
+        return _sanitizeOutput(updatedRow);
       })
     });
   };

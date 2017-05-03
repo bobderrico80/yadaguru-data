@@ -40,7 +40,7 @@ describe('The Schools Service', function() {
     it('should resolve with an array of objects representing schools', function() {
       mocks.stubs.School.findAll.returns(Promise.resolve(schools.map(
         function(school) {
-          return {dataValues: school};
+          return school;
         }
       )));
 
@@ -57,7 +57,7 @@ describe('The Schools Service', function() {
   describe('The findByIdForUser function', function() {
     it('should resolve with an array with the matching school object', function() {
       mocks.stubs.School.findOne.withArgs({where: {id: 1, userId: 1}})
-        .returns(Promise.resolve({dataValues: schools[0]}));
+        .returns(Promise.resolve(schools[0]));
 
       return schoolService.findByIdForUser(1, 1).should.eventually.deep.equal([schools[0]]);
     });
@@ -80,7 +80,7 @@ describe('The Schools Service', function() {
 
     it('should resolve with an array containing the new school object', function() {
       mocks.stubs.School.create.withArgs(newSchool)
-        .returns(Promise.resolve({dataValues: newSchool}));
+        .returns(Promise.resolve(newSchool));
 
       return schoolService.create(newSchool).should.eventually.deep.equal([newSchool]);
     });
@@ -111,7 +111,7 @@ describe('The Schools Service', function() {
       mocks.stubs.School.findOne.withArgs({where: {id: 1, userId: 1}})
         .returns(Promise.resolve(row));
       update.withArgs(updatedSchool)
-        .returns(Promise.resolve({dataValues: updatedSchool}));
+        .returns(Promise.resolve(updatedSchool));
 
       return schoolService.updateForUser(idToUpdate, updatedSchool, 1)
         .should.eventually.deep.equal([updatedSchool]);

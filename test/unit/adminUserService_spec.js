@@ -35,7 +35,7 @@ describe('The AdminUsers Service', function() {
 
     it('should return user id if the user password matches the salted-hashed password', function() {
       mocks.stubs.AdminUser.findOne.withArgs({where: {userName: 'admin'}})
-        .returns(Promise.resolve({dataValues: adminUser}));
+        .returns(Promise.resolve(adminUser));
       mocks.stubs.bcrypt.compareSync.withArgs('password', 'salted hashed password')
         .returns(adminUser);
 
@@ -72,7 +72,7 @@ describe('The AdminUsers Service', function() {
       mocks.stubs.bcrypt.hashSync.withArgs('password', 'salt')
         .returns('salted hashed password');
       mocks.stubs.AdminUser.create.withArgs({userName: 'admin', password: 'salted hashed password'})
-        .returns(Promise.resolve({dataValues: newAdminUser}));
+        .returns(Promise.resolve(newAdminUser));
 
       return adminUserService.create('admin', 'password').should.eventually.deep.equal(newAdminUser);
     });

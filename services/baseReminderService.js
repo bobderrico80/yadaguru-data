@@ -7,40 +7,37 @@ module.exports = function(models) {
   var baseReminderService = require('./baseDbService')(BaseReminder);
 
   baseReminderService.findAll = function() {
-    return BaseReminder.findAll({include: [Timeframe, Category]}).then(function(resp) {
-      var baseReminders = resp.map(function(resp) {
-        return resp.dataValues;
-      });
-
-      return baseReminders.map(function(baseReminder) {
-        baseReminder.timeframeIds = baseReminder.Timeframes.map(function(timeframeResp) {
-          return timeframeResp.dataValues.id;
+    return BaseReminder.findAll({include: [Timeframe, Category]})
+      .then(function(baseReminders) {
+        return baseReminders.map(function(baseReminder){
+          var json = baseReminder.toJSON();
+          json.timeframeIds = [];
+          json.timeframes = [];
+          json.Timeframes.forEach(function(Timeframe) {
+            json.timeframeIds.push(Timeframe.id);
+            json.timeframes.push(Timeframe.name);
+          })
+          json.categoryName = baseReminder.Category.name;
+          delete json.Timeframes;
+          delete json.Category;
+          return json;
         });
-        baseReminder.timeframes = baseReminder.Timeframes.map(function(timeframeResp) {
-          return timeframeResp.dataValues.name;
-        });
-        baseReminder.categoryName = baseReminder.Category.dataValues.name;
-        delete baseReminder.Timeframes;
-        delete baseReminder.Category;
-        return baseReminder;
-      });
-
-    });
-  };
+      })
+  }
 
   baseReminderService.findAllIncludingTimeframes = function() {
     return BaseReminder.findAll({include: Timeframe}).then(function(resp) {
       var baseReminders = resp.map(function(resp) {
-        return resp.dataValues;
+        return resp;
       });
 
       return baseReminders.map(function(baseReminder) {
         baseReminder.timeframes = baseReminder.Timeframes.map(function(timeframeResp) {
           return {
-            id: timeframeResp.dataValues.id,
-            name: timeframeResp.dataValues.name,
-            type: timeframeResp.dataValues.type,
-            formula: timeframeResp.dataValues.formula
+            id: timeframeResp.id,
+            name: timeframeResp.name,
+            type: timeframeResp.type,
+            formula: timeframeResp.formula
           }
         });
         delete baseReminder.Timeframes;
@@ -50,23 +47,23 @@ module.exports = function(models) {
   };
 
   baseReminderService.findById = function(id) {
-    return BaseReminder.findById(id, {include: [Timeframe, Category]}).then(function(resp) {
-      if (!resp) {
+    return BaseReminder.findById(id, {include: [Timeframe, Category]}).then(function(baseReminder) {
+      if (!baseReminder) {
         return [];
       }
 
-      var baseReminder = resp.dataValues;
+      var json = baseReminder.toJSON();
 
-      baseReminder.timeframeIds = baseReminder.Timeframes.map(function(timeframeResp) {
-        return timeframeResp.dataValues.id;
+      json.timeframeIds = baseReminder.Timeframes.map(function(timeframeResp) {
+        return timeframeResp.id;
       });
-      baseReminder.timeframes = baseReminder.Timeframes.map(function(timeframeResp) {
-        return timeframeResp.dataValues.name;
+      json.timeframes = baseReminder.Timeframes.map(function(timeframeResp) {
+        return timeframeResp.name;
       });
-      baseReminder.categoryName = baseReminder.Category.dataValues.name;
-      delete baseReminder.Timeframes;
-      delete baseReminder.Category;
-      return [baseReminder];
+      json.categoryName = baseReminder.Category.name;
+      delete json.Timeframes;
+      delete json.Category;
+      return [json];
 
     });
   };
@@ -75,10 +72,10 @@ module.exports = function(models) {
     var timeframes = data.timeframeIds;
 
     return BaseReminder.create(data).then(function(newBaseReminder) {
-      var baseReminder = newBaseReminder.dataValues;
       return newBaseReminder.setTimeframes(timeframes).then(function() {
-        baseReminder.timeframeIds = data.timeframeIds;
-        return [baseReminder];
+        var json = newBaseReminder.toJSON();
+        json.timeframeIds = data.timeframeIds;
+        return [json];
       });
     });
   };
@@ -90,18 +87,18 @@ module.exports = function(models) {
       }
 
       return baseReminder.update(data).then(function(updatedBaseReminder) {
-        var baseReminder = updatedBaseReminder.dataValues;
+        var json = updatedBaseReminder.toJSON();
         if (data.timeframeIds) {
           return updatedBaseReminder.setTimeframes(data.timeframeIds).then(function() {
-            baseReminder.timeframeIds = data.timeframeIds;
-            return [baseReminder];
+            json.timeframeIds = data.timeframeIds;
+            return [json];
           });
         }
         return updatedBaseReminder.getTimeframes().then(function(timeframes) {
-          baseReminder.timeframeIds = timeframes.map(function(timeframe) {
-            return timeframe.dataValues.id;
+          json.timeframeIds = timeframes.map(function(timeframe) {
+            return timeframe.id;
           });
-          return [baseReminder];
+          return [json];
         })
       })
     })

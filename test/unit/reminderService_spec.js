@@ -17,66 +17,50 @@ describe('The Reminders Service', function() {
   var reminderService;
   
   var dbResponse = [{
-    dataValues: {
+    id: '1',
+    userId: '1',
+    dueDate: '2017-02-01',
+    timeframe: 'One week before',
+    BaseReminder: {
       id: '1',
-      userId: '1',
-      dueDate: '2017-02-01',
-      timeframe: 'One week before',
-      BaseReminder: {
-        dataValues: {
-          id: '1',
-          name: 'Write Essay',
-          message: 'Better get writing!',
-          detail: 'Some help for writing your essay',
-          lateMessage: 'Too late',
-          lateDetail: 'Should have started sooner',
-          categoryId: 1,
-          Category: {
-            dataValues: {
-              id: 1,
-              name: 'Essays'
-            }
-          }
-        }
-      },
-      School: {
-        dataValues: {
-          id: '1',
-          name: 'Temple',
-          dueDate: '2017-02-01'
-        }
+      name: 'Write Essay',
+      message: 'Better get writing!',
+      detail: 'Some help for writing your essay',
+      lateMessage: 'Too late',
+      lateDetail: 'Should have started sooner',
+      categoryId: 1,
+      Category: {
+        id: 1,
+        name: 'Essays'
       }
+    },
+    School: {
+      id: '1',
+      name: 'Temple',
+      dueDate: '2017-02-01'
     }
   }, {
-    dataValues: {
+    id: '2',
+    userId: '1',
+    dueDate: '2017-02-01',
+    timeframe: 'One week before',
+    BaseReminder: {
       id: '2',
-      userId: '1',
-      dueDate: '2017-02-01',
-      timeframe: 'One week before',
-      BaseReminder: {
-        dataValues: {
-          id: '2',
-          name: 'Get Recommendations',
-          message: 'Ask your counselor',
-          detail: 'Tips for asking your counselor',
-          lateMessage: 'Too late',
-          lateDetail: '',
-          categoryId: '2',
-          Category: {
-            dataValues: {
-              id: '2',
-              name: 'Recommendations'
-            }
-          }
-        }
-      },
-      School: {
-        dataValues: {
-          id: '1',
-          name: 'Temple',
-          dueDate: '2017-02-01'
-        }
+      name: 'Get Recommendations',
+      message: 'Ask your counselor',
+      detail: 'Tips for asking your counselor',
+      lateMessage: 'Too late',
+      lateDetail: '',
+      categoryId: '2',
+      Category: {
+        id: '2',
+        name: 'Recommendations'
       }
+    },
+    School: {
+      id: '1',
+      name: 'Temple',
+      dueDate: '2017-02-01'
     }
   }];
 

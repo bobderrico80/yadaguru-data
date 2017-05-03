@@ -41,11 +41,7 @@ describe('The Timeframes Service', function() {
 
   describe('The findAll function', function() {
     it('should resolve with an array of objects representing timeframes', function() {
-      mocks.stubs.Timeframe.findAll.returns(Promise.resolve(timeframes.map(
-        function(timeframe) {
-          return {dataValues: timeframe};
-        }
-      )));
+      mocks.stubs.Timeframe.findAll.returns(Promise.resolve(timeframes));
 
       return timeframeService.findAll().should.eventually.deep.equal(timeframes);
     });
@@ -60,7 +56,7 @@ describe('The Timeframes Service', function() {
   describe('The findById function', function() {
     it('should resolve with an array with the matching timeframe object', function() {
       mocks.stubs.Timeframe.findById.withArgs(1)
-        .returns(Promise.resolve({dataValues: timeframes[0]}));
+        .returns(Promise.resolve(timeframes[0]));
 
       return timeframeService.findById(1).should.eventually.deep.equal([timeframes[0]]);
     });
@@ -82,7 +78,7 @@ describe('The Timeframes Service', function() {
 
     it('should resolve with an array containing the new timeframe object', function() {
       mocks.stubs.Timeframe.create.withArgs(newTimeframe)
-        .returns(Promise.resolve({dataValues: newTimeframe}));
+        .returns(Promise.resolve(newTimeframe));
 
       return timeframeService.create(newTimeframe).should.eventually.deep.equal([newTimeframe]);
     });
@@ -112,7 +108,7 @@ describe('The Timeframes Service', function() {
       mocks.stubs.Timeframe.findById.withArgs(idToUpdate)
         .returns(Promise.resolve(row));
       update.withArgs(updatedTimeframe)
-        .returns(Promise.resolve({dataValues: updatedTimeframe}));
+        .returns(Promise.resolve(updatedTimeframe));
 
       return timeframeService.update(idToUpdate, updatedTimeframe).should.eventually.deep.equal([updatedTimeframe]);
     });
