@@ -10,7 +10,7 @@ chai.should();
 
 describe('The Users Service', function() {
   var mocks = require('../mocks')('User');
-  var userService;
+  var cipher, userService;
 
   var users = [{
     id: 1,
@@ -27,7 +27,10 @@ describe('The Users Service', function() {
   
   beforeEach(function() {
     mocks.stubMethods();
-
+    cipher = require('../../services/cipherService');
+    cipher.encrypt = function() {
+      return 'ENCRYPTED'
+    }
     userService = require('../../services/userService')(mocks.modelMock);
   });
 
@@ -68,14 +71,14 @@ describe('The Users Service', function() {
   describe('The getUserByPhoneNumber function', function() {
     it('should resolve with  the matching user object', function() {
       var userObj = {dataValues: users[0]};
-      mocks.stubs.User.findOne.withArgs({where: {phoneNumber: '1234567890'}})
+      mocks.stubs.User.findOne.withArgs({where: {phoneNumber: 'ENCRYPTED'}})
         .returns(Promise.resolve(userObj));
 
       return userService.getUserByPhoneNumber('1234567890').should.eventually.deep.equal(userObj);
     });
 
     it('should resolve with null if no matching users were found', function() {
-      mocks.stubs.User.findOne.withArgs({where: {phoneNumber: '5555555555'}})
+      mocks.stubs.User.findOne.withArgs({where: {phoneNumber: 'ENCRYPTED'}})
         .returns(Promise.resolve(null));
 
       return userService.getUserByPhoneNumber('5555555555').should.eventually.deep.equal(null);
