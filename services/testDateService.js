@@ -6,13 +6,7 @@ module.exports = function(models) {
   var TestDate = models.TestDate;
   var Test = models.Test;
 
-  var outputSanitizer = function(testDate) {
-    testDate.adminDate = moment.utc(testDate.adminDate).format('YYYY-MM-DD');
-    testDate.registrationDate = moment.utc(testDate.registrationDate).format('YYYY-MM-DD');
-    return testDate;
-  };
-
-  var testDateService = require('./baseDbService')(TestDate, outputSanitizer);
+  var testDateService = require('./baseDbService')(TestDate);
 
   testDateService.findAll = function() {
     return TestDate.findAll({
@@ -20,15 +14,15 @@ module.exports = function(models) {
     }).then(function(rows) {
       return rows.map(function(row) {
         return {
-          id: row.dataValues.id,
-          testId: row.dataValues.testId,
-          registrationDate: _formatDate(row.dataValues.registrationDate),
-          adminDate: _formatDate(row.dataValues.adminDate),
-          type: row.dataValues.Test.dataValues.type,
-          registrationMessage: row.dataValues.Test.dataValues.registrationMessage,
-          registrationDetail: row.dataValues.Test.dataValues.registrationDetail,
-          adminMessage: row.dataValues.Test.dataValues.adminMessage,
-          adminDetail: row.dataValues.Test.dataValues.adminDetail
+          id: row.id,
+          testId: row.testId,
+          registrationDate: _formatDate(row.registrationDate),
+          adminDate: _formatDate(row.adminDate),
+          type: row.Test.type,
+          registrationMessage: row.Test.registrationMessage,
+          registrationDetail: row.Test.registrationDetail,
+          adminMessage: row.Test.adminMessage,
+          adminDetail: row.Test.adminDetail
         }
       });
     })

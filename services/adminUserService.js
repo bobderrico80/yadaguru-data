@@ -15,7 +15,7 @@ module.exports = function(models) {
     };
 
     return AdminUser.create(data).then(function(newUser) {
-      return newUser.dataValues;
+      return newUser;
     })
   };
 
@@ -25,9 +25,9 @@ module.exports = function(models) {
         return false;
       }
 
-      if (bcrypt.compareSync(password, user.dataValues.password)) {
+      if (bcrypt.compareSync(password, user.password)) {
         return {
-          id: user.dataValues.id
+          id: user.id
         };
       }
       return false;

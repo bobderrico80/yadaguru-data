@@ -7,29 +7,24 @@ module.exports = function(models) {
   var Category = models.Category;
   var School = models.School;
 
-  var outputSanitizer = function(reminder) {
-    reminder.dueDate = moment.utc(reminder.dueDate).format('YYYY-MM-DD');
-    return reminder;
-  };
-
-  var reminderService = require('./baseDbService')(Reminder, outputSanitizer);
+  var reminderService = require('./baseDbService')(Reminder);
 
   function getReminderResponse(row) {
     return {
-      id: row.dataValues.id,
-      dueDate: moment.utc(row.dataValues.dueDate).format('YYYY-MM-DD'),
-      timeframe: row.dataValues.timeframe,
-      name: row.dataValues.BaseReminder.dataValues.name,
-      message: row.dataValues.BaseReminder.dataValues.message,
-      detail: row.dataValues.BaseReminder.dataValues.detail,
-      lateMessage: row.dataValues.BaseReminder.dataValues.lateMessage,
-      lateDetail: row.dataValues.BaseReminder.dataValues.lateDetail,
-      category: row.dataValues.BaseReminder.dataValues.Category.dataValues.name,
-      baseReminderId: row.dataValues.BaseReminder.dataValues.id,
-      schoolName: row.dataValues.School.dataValues.name,
-      schoolId: row.dataValues.School.dataValues.id,
-      schoolDueDate: row.dataValues.School.dataValues.dueDate,
-      userId: row.dataValues.userId
+      id: row.id,
+      dueDate: moment.utc(row.dueDate).format('YYYY-MM-DD'),
+      timeframe: row.timeframe,
+      name: row.BaseReminder.name,
+      message: row.BaseReminder.message,
+      detail: row.BaseReminder.detail,
+      lateMessage: row.BaseReminder.lateMessage,
+      lateDetail: row.BaseReminder.lateDetail,
+      category: row.BaseReminder.Category.name,
+      baseReminderId: row.BaseReminder.id,
+      schoolName: row.School.name,
+      schoolId: row.School.id,
+      schoolDueDate: row.School.dueDate,
+      userId: row.userId
     }
   }
 

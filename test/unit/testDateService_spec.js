@@ -55,45 +55,29 @@ describe('The TestDates Service', function() {
       }];
 
       dbResponse = [{
-        dataValues: {
-          id: '1',
-          testId: '1',
-          registrationDate: '2016-09-01',
-          adminDate: '2016-10-01',
-          Test: {
-            dataValues: tests[0]
-          }
-        }
+        id: '1',
+        testId: '1',
+        registrationDate: '2016-09-01',
+        adminDate: '2016-10-01',
+        Test: tests[0]
       }, {
-        dataValues: {
-          id: '2',
-          testId: '1',
-          registrationDate: '2016-09-15',
-          adminDate: '2016-10-15',
-          Test: {
-            dataValues: tests[0]
-          }
-        }
+        id: '2',
+        testId: '1',
+        registrationDate: '2016-09-15',
+        adminDate: '2016-10-15',
+        Test: tests[0]
       }, {
-        dataValues: {
-          id: '3',
-          testId: '2',
-          registrationDate: '2017-01-01',
-          adminDate: '2016-02-01',
-          Test: {
-            dataValues: tests[1]
-          }
-        }
+        id: '3',
+        testId: '2',
+        registrationDate: '2017-01-01',
+        adminDate: '2016-02-01',
+        Test: tests[1]
       }, {
-        dataValues: {
-          id: '4',
-          testId: '2',
-          registrationDate: '2017-01-15',
-          adminDate: '2016-02-15',
-          Test: {
-            dataValues: tests[1]
-          }
-        }
+        id: '4',
+        testId: '2',
+        registrationDate: '2017-01-15',
+        adminDate: '2016-02-15',
+        Test: tests[1]
       }];
     });
 
@@ -157,7 +141,7 @@ describe('The TestDates Service', function() {
   describe('The findById function', function() {
     it('should resolve with an array with the matching testDate object', function() {
       mocks.stubs.TestDate.findById.withArgs(1)
-        .returns(Promise.resolve({dataValues: testDates[0]}));
+        .returns(Promise.resolve(testDates[0]));
 
       return testDateService.findById(1).should.eventually.deep.equal([testDates[0]]);
     });
@@ -180,7 +164,7 @@ describe('The TestDates Service', function() {
 
     it('should resolve with an array containing the new testDate object', function() {
       mocks.stubs.TestDate.create.withArgs(newTestDate)
-        .returns(Promise.resolve({dataValues: newTestDate}));
+        .returns(Promise.resolve(newTestDate));
 
       return testDateService.create(newTestDate).should.eventually.deep.equal([newTestDate]);
     });
@@ -210,7 +194,7 @@ describe('The TestDates Service', function() {
       mocks.stubs.TestDate.findById.withArgs(idToUpdate)
         .returns(Promise.resolve(row));
       update.withArgs(updatedTestDate)
-        .returns(Promise.resolve({dataValues: updatedTestDate}));
+        .returns(Promise.resolve(updatedTestDate));
 
       return testDateService.update(idToUpdate, updatedTestDate).should.eventually.deep.equal([updatedTestDate]);
     });

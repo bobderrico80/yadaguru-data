@@ -21,7 +21,7 @@ describe('The BaseReminders Service', function() {
 
     baseReminderService = require('../../services/baseReminderService')(mocks.modelMock);
 
-    baseRemindersDbResponse = [{dataValues: {
+    baseRemindersDbResponse = [{
       id: 1,
       name: 'Write Essays',
       message: 'Write Your Essays',
@@ -30,13 +30,26 @@ describe('The BaseReminders Service', function() {
       lateDetail: 'What to do about late essays',
       categoryId: 1,
       Timeframes: [
-        {dataValues: {id: 1, name: '90 Days'}},
-        {dataValues: {id: 2, name: '60 Days'}}
+        {id: 1, name: '90 Days'},
+        {id: 2, name: '60 Days'}
       ],
       Category: {
-        dataValues: {id: 1, name: 'Essays'}
+        id: 1, name: 'Essays'
+      },
+      toJSON: function() {
+        return {
+          id: this.id,
+          name: this.name,
+          message: this.message,
+          detail: this.detail,
+          lateMessage: this.lateMessage,
+          lateDetail: this.lateDetail,
+          categoryId: this.categoryId,
+          Timeframes: this.Timeframes,
+          Category: this.Category
+        };
       }
-    }}, {dataValues: {
+    }, {
       id: 1,
       name: 'Get Recommendations',
       message: 'Ask counselor for recommendations',
@@ -45,12 +58,25 @@ describe('The BaseReminders Service', function() {
       lateDetail: 'What to do about late recommendations',
       categoryId: 1,
       Timeframes: [
-        {dataValues: {id: 3, name: '30 Days'}}
+        {id: 3, name: '30 Days'}
       ],
       Category: {
-        dataValues: {id: 1, name: 'Essays'}
+        id: 1, name: 'Essays'
+      },
+      toJSON: function() {
+        return {
+          id: this.id,
+          name: this.name,
+          message: this.message,
+          detail: this.detail,
+          lateMessage: this.lateMessage,
+          lateDetail: this.lateDetail,
+          categoryId: this.categoryId,
+          Timeframes: this.Timeframes,
+          Category: this.Category
+        };
       }
-    }}];
+    }];
     baseReminders = [{
       id: 1,
       name: 'Write Essays',
@@ -102,49 +128,40 @@ describe('The BaseReminders Service', function() {
 
     beforeEach(function() {
       baseRemindersIncludingTimeframes = [{
-        dataValues: {
-          id: '1',
-          name: 'Write Essay',
-          message: 'Better get writing!',
-          detail: 'Some help for writing your essay',
-          lateMessage: 'Too late',
-          lateDetail: 'Should have started sooner',
-          Timeframes: [{
-            dataValues: {
-              id: 1,
-              name: 'Today',
-              type: 'now',
-              formula: undefined
-            }
-          }, {
-            dataValues: {
-              id: 2,
-              name: 'In 30 Days',
-              type: 'relative',
-              formula: '30'
-            }
-          }],
-          categoryId: 1
-        }
+        id: '1',
+        name: 'Write Essay',
+        message: 'Better get writing!',
+        detail: 'Some help for writing your essay',
+        lateMessage: 'Too late',
+        lateDetail: 'Should have started sooner',
+        Timeframes: [{
+          id: 1,
+          name: 'Today',
+          type: 'now',
+          formula: undefined
+        }, {
+          id: 2,
+          name: 'In 30 Days',
+          type: 'relative',
+          formula: '30'
+        }],
+        categoryId: 1
       }, {
-        dataValues: {
-          id: '2',
-          name: 'Get Recommendations',
-          message: 'Ask your counselor',
-          detail: 'Tips for asking your counselor',
-          lateMessage: 'Too late',
-          lateDetail: '',
-          Timeframes: [{
-            dataValues: {
-              id: 3,
-              name: 'January 1',
-              type: 'absolute',
-              formula: '2017-01-01'
-            }
-          }],
-          categoryId: 2
+        id: '2',
+        name: 'Get Recommendations',
+        message: 'Ask your counselor',
+        detail: 'Tips for asking your counselor',
+        lateMessage: 'Too late',
+        lateDetail: '',
+        Timeframes: [{
+          id: 3,
+          name: 'January 1',
+          type: 'absolute',
+          formula: '2017-01-01'
+        }],
+        categoryId: 2
         }
-      }];
+      ];
     });
 
     it('should resolve with baseReminder objects that include an array of Timeframes belonging to it', function() {
@@ -222,25 +239,29 @@ describe('The BaseReminders Service', function() {
 
     beforeEach(function() {
       newBaseReminderDbResponse = {
-        dataValues: {
-          name: 'Write Essays',
-          message: 'Write Your Essays',
-          detail: 'More detail about essays',
-          lateMessage: 'Your Essays are late',
-          lateDetail: 'What to do about late essays',
-          categoryId: 1
-        },
-        setTimeframes: function(){}
+        name: 'Write Essays',
+        message: 'Write Your Essays',
+        detail: 'More detail about essays',
+        lateMessage: 'Your Essays are late',
+        lateDetail: 'What to do about late essays',
+        categoryId: 1,
+        setTimeframes: function(){},
+        toJSON: function() {
+          return {
+            name: this.name,
+            message: this.message,
+            detail: this.detail,
+            lateMessage: this.lateMessage,
+            lateDetail: this.lateDetail,
+            categoryId: this.categoryId
+          };
+        }
       };
 
       newTimeframeAssociations = [[{
-        dataValues: {
-          TimeframeId: 1
-        }
+        TimeframeId: 1
       }, {
-        dataValues: {
-          TimeframeId: 2
-        }
+        TimeframeId: 2
       }]];
 
       setTimeframes = sinon.stub(newBaseReminderDbResponse, 'setTimeframes');
@@ -285,35 +306,36 @@ describe('The BaseReminders Service', function() {
 
     beforeEach(function() {
       updatedBaseReminderDbResponse = {
-        dataValues: {
-          name: 'Write Essays',
-          message: 'Write Your Essays',
-          detail: 'More detail about essays',
-          lateMessage: 'Your Essays are late',
-          lateDetail: 'What to do about late essays',
-          categoryId: 1
-        },
+        name: 'Write Essays',
+        message: 'Write Your Essays',
+        detail: 'More detail about essays',
+        lateMessage: 'Your Essays are late',
+        lateDetail: 'What to do about late essays',
+        categoryId: 1,
         setTimeframes: function(){},
-        getTimeframes: function(){}
+        getTimeframes: function(){},
+        toJSON: function() {
+          return {
+            name: this.name,
+            message: this.message,
+            detail: this.detail,
+            lateMessage: this.lateMessage,
+            lateDetail: this.lateDetail,
+            categoryId: this.categoryId
+          };
+        }
       };
 
       updatedTimeframeAssociations = [[{
-        dataValues: {
-          TimeframeId: 1
-        }
+        TimeframeId: 1
       }, {
-        dataValues: {
-          TimeframeId: 2
-        }
+        TimeframeId: 2
       }]];
 
       associatedTimeframes = [{
-        dataValues: {
-          id: 1
-        }}, {
-        dataValues: {
-          id: 2
-        }
+        id: 1
+      }, {
+        id: 2
       }];
 
       baseReminder = {

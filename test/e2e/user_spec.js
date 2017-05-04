@@ -64,7 +64,7 @@ describe('The userService', function() {
 
   it('should get a user by phone number', function() {
     return userService.getUserByPhoneNumber('1234567890').then(function(users) {
-      users.dataValues.id.should.equal(1);
+      users.id.should.equal(1);
     })
   })
 

@@ -29,11 +29,7 @@ describe('The Categories Service', function() {
 
   describe('The findAll function', function() {
     it('should resolve with an array of objects representing categories', function() {
-      mocks.stubs.Category.findAll.returns(Promise.resolve(categories.map(
-        function(category) {
-          return {dataValues: category};
-        }
-      )));
+      mocks.stubs.Category.findAll.returns(Promise.resolve(categories));
 
       return categoryService.findAll().should.eventually.deep.equal(categories);
     });
@@ -48,7 +44,7 @@ describe('The Categories Service', function() {
   describe('The findById function', function() {
     it('should resolve with an array with the matching category object', function() {
       mocks.stubs.Category.findById.withArgs(1)
-        .returns(Promise.resolve({dataValues: categories[0]}));
+        .returns(Promise.resolve(categories[0]));
 
       return categoryService.findById(1).should.eventually.deep.equal([categories[0]]);
     });
@@ -68,7 +64,7 @@ describe('The Categories Service', function() {
 
     it('should resolve with an array containing the new category object', function() {
       mocks.stubs.Category.create.withArgs(newCategory)
-        .returns(Promise.resolve({dataValues: newCategory}));
+        .returns(Promise.resolve(newCategory));
 
       return categoryService.create(newCategory).should.eventually.deep.equal([newCategory]);
     });
@@ -95,7 +91,7 @@ describe('The Categories Service', function() {
       mocks.stubs.Category.findById.withArgs(idToUpdate)
         .returns(Promise.resolve(row));
       update.withArgs(updatedCategory)
-        .returns(Promise.resolve({dataValues: updatedCategory}));
+        .returns(Promise.resolve(updatedCategory));
 
       return categoryService.update(idToUpdate, updatedCategory).should.eventually.deep.equal([updatedCategory]);
     });

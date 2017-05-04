@@ -10,7 +10,7 @@ chai.should();
 
 describe('The Users Service', function() {
   var mocks = require('../mocks')('User');
-  var userService;
+  var cipher, userService;
 
   var users = [{
     id: 1,
@@ -27,7 +27,10 @@ describe('The Users Service', function() {
   
   beforeEach(function() {
     mocks.stubMethods();
-
+    cipher = require('../../services/cipherService');
+    cipher.encrypt = function() {
+      return 'ENCRYPTED'
+    }
     userService = require('../../services/userService')(mocks.modelMock);
   });
 
@@ -37,11 +40,7 @@ describe('The Users Service', function() {
 
   describe('The findAll function', function() {
     it('should resolve with an array of objects representing users', function() {
-      mocks.stubs.User.findAll.returns(Promise.resolve(users.map(
-        function(user) {
-          return {dataValues: user};
-        }
-      )));
+      mocks.stubs.User.findAll.returns(Promise.resolve(users));
 
       return userService.findAll().should.eventually.deep.equal(users);
     });
@@ -56,7 +55,7 @@ describe('The Users Service', function() {
   describe('The findById function', function() {
     it('should resolve with an array with the matching user object', function() {
       mocks.stubs.User.findById.withArgs(1)
-        .returns(Promise.resolve({dataValues: users[0]}));
+        .returns(Promise.resolve(users[0]));
 
       return userService.findById(1).should.eventually.deep.equal([users[0]]);
     });
@@ -72,14 +71,14 @@ describe('The Users Service', function() {
   describe('The getUserByPhoneNumber function', function() {
     it('should resolve with  the matching user object', function() {
       var userObj = {dataValues: users[0]};
-      mocks.stubs.User.findOne.withArgs({where: {phoneNumber: '1234567890'}})
+      mocks.stubs.User.findOne.withArgs({where: {phoneNumber: 'ENCRYPTED'}})
         .returns(Promise.resolve(userObj));
 
       return userService.getUserByPhoneNumber('1234567890').should.eventually.deep.equal(userObj);
     });
 
     it('should resolve with null if no matching users were found', function() {
-      mocks.stubs.User.findOne.withArgs({where: {phoneNumber: '5555555555'}})
+      mocks.stubs.User.findOne.withArgs({where: {phoneNumber: 'ENCRYPTED'}})
         .returns(Promise.resolve(null));
 
       return userService.getUserByPhoneNumber('5555555555').should.eventually.deep.equal(null);
@@ -93,7 +92,7 @@ describe('The Users Service', function() {
 
     it('should resolve with an array containing the new user object', function() {
       mocks.stubs.User.create.withArgs(newUser)
-        .returns(Promise.resolve({dataValues: newUser}));
+        .returns(Promise.resolve(newUser));
 
       return userService.create(newUser).should.eventually.deep.equal([newUser]);
     });
@@ -121,7 +120,7 @@ describe('The Users Service', function() {
       mocks.stubs.User.findById.withArgs(idToUpdate)
         .returns(Promise.resolve(row));
       update.withArgs(updatedUser)
-        .returns(Promise.resolve({dataValues: updatedUser}));
+        .returns(Promise.resolve(updatedUser));
 
       return userService.update(idToUpdate, updatedUser).should.eventually.deep.equal([updatedUser]);
     });

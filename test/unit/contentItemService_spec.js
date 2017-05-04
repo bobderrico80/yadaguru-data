@@ -39,11 +39,7 @@ describe('The ContentItems Service', function() {
 
   describe('The findAll function', function() {
     it('should resolve with an array of objects representing contentItems', function() {
-      mocks.stubs.ContentItem.findAll.returns(Promise.resolve(contentItems.map(
-        function(contentItem) {
-          return {dataValues: contentItem};
-        }
-      )));
+      mocks.stubs.ContentItem.findAll.returns(Promise.resolve(contentItems));
 
       return contentItemService.findAll().should.eventually.deep.equal(contentItems);
     });
@@ -58,7 +54,7 @@ describe('The ContentItems Service', function() {
   describe('The findById function', function() {
     it('should resolve with an array with the matching contentItem object', function() {
       mocks.stubs.ContentItem.findAll.withArgs({where: {name: 'faqs'}})
-        .returns(Promise.resolve([{dataValues: contentItems[0]}]));
+        .returns(Promise.resolve([contentItems[0]]));
 
       return contentItemService.findByName('faqs').should.eventually.deep.equal([contentItems[0]]);
     });
@@ -79,7 +75,7 @@ describe('The ContentItems Service', function() {
 
     it('should resolve with an array containing the new contentItem object', function() {
       mocks.stubs.ContentItem.create.withArgs(newContentItem)
-        .returns(Promise.resolve({dataValues: newContentItem}));
+        .returns(Promise.resolve(newContentItem));
 
       return contentItemService.create(newContentItem).should.eventually.deep.equal([newContentItem]);
     });
@@ -108,7 +104,7 @@ describe('The ContentItems Service', function() {
       mocks.stubs.ContentItem.findById.withArgs(idToUpdate)
         .returns(Promise.resolve(row));
       update.withArgs(updatedContentItem)
-        .returns(Promise.resolve({dataValues: updatedContentItem}));
+        .returns(Promise.resolve(updatedContentItem));
 
       return contentItemService.update(idToUpdate, updatedContentItem).should.eventually.deep.equal([updatedContentItem]);
     });

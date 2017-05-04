@@ -1,4 +1,7 @@
 'use strict';
+
+var moment = require('moment');
+
 module.exports = function(sequelize, DataTypes) {
   var Reminder = sequelize.define('Reminder', {
     timeframe: {
@@ -7,7 +10,10 @@ module.exports = function(sequelize, DataTypes) {
     },
     dueDate: {
       allowNull: false,
-      type: DataTypes.DATE
+      type: DataTypes.DATE,
+      get: function() {
+        return moment.utc(this.getDataValue('dueDate')).format('YYYY-MM-DD');
+      }
     },
     isSent: {
       allowNull: false,

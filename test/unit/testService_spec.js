@@ -44,11 +44,7 @@ describe('The Tests Service', function() {
 
   describe('The findAll function', function() {
     it('should resolve with an array of objects representing tests', function() {
-      mocks.stubs.Test.findAll.returns(Promise.resolve(tests.map(
-        function(test) {
-          return {dataValues: test};
-        }
-      )));
+      mocks.stubs.Test.findAll.returns(Promise.resolve(tests));
 
       return testService.findAll().should.eventually.deep.equal(tests);
     });
@@ -63,7 +59,7 @@ describe('The Tests Service', function() {
   describe('The findById function', function() {
     it('should resolve with an array with the matching test object', function() {
       mocks.stubs.Test.findById.withArgs(1)
-        .returns(Promise.resolve({dataValues: tests[0]}));
+        .returns(Promise.resolve(tests[0]));
 
       return testService.findById(1).should.eventually.deep.equal([tests[0]]);
     });
@@ -87,7 +83,7 @@ describe('The Tests Service', function() {
 
     it('should resolve with an array containing the new test object', function() {
       mocks.stubs.Test.create.withArgs(newTest)
-        .returns(Promise.resolve({dataValues: newTest}));
+        .returns(Promise.resolve(newTest));
 
       return testService.create(newTest).should.eventually.deep.equal([newTest]);
     });
@@ -119,7 +115,7 @@ describe('The Tests Service', function() {
       mocks.stubs.Test.findById.withArgs(idToUpdate)
         .returns(Promise.resolve(row));
       update.withArgs(updatedTest)
-        .returns(Promise.resolve({dataValues: updatedTest}));
+        .returns(Promise.resolve(updatedTest));
 
       return testService.update(idToUpdate, updatedTest).should.eventually.deep.equal([updatedTest]);
     });
